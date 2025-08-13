@@ -24,7 +24,7 @@ val COMMENT_PRIVACY = listOf<Int>(
 data class Comment<A, B>(
     var noteId: A,
     var message: B,
-    var commetId: A,
+    var commentId: A,
 )
 
 class NotesService {
@@ -55,12 +55,12 @@ class NotesService {
     }
 
     //создание комментария
-    fun createComment(noteId: Int, message: String, commentId: Int): Int {
-        val notesExists = notes.any { it.nId == noteId }
-        if (!notesExists) {
-            throw NotesNotFoundException("Заметки под номером $noteId, не существует")
+    fun createComment(noteId: Int, message: String): Int {
+        if (!notes.any { it.nId == noteId }) {
+            throw NotesNotFoundException("Заметки под номером $noteId не существует")
         }
-        comment.add(Comment(noteId = noteId, message = message, commetId = commentId))
+        val newComment = Comment(noteId = noteId, message = message, commentId = cId)
+        comment.add(newComment)
         return cId++
     }
 
@@ -77,7 +77,7 @@ class NotesService {
 
     //удаление комментария
     fun deleteComment(commentId: Int): Int {
-        val foundComment = comment.find { it.noteId == commentId }
+        val foundComment = comment.find { it.commentId == commentId }
         if (foundComment != null) {
             deleteComment.add(foundComment)
             comment.remove(foundComment)
@@ -113,7 +113,7 @@ class NotesService {
         commentId: Int,
         message: String,
     ): Int {
-        val foundComment = comment.find { it.noteId == commentId }
+        val foundComment = comment.find { it.commentId == commentId }
         if (foundComment != null) {
             foundComment.message = message
             return 1
@@ -146,23 +146,22 @@ class NotesService {
     }
 
     //получить комментарий
-    fun getComment(
+    fun getComments(
         noteId: Int,
-        count: Int
-    ): Any {
-        val foundComment = comment.find { it.noteId == noteId }
-        if (foundComment != null) {
-            return foundComment
-        } else if (count > 0) {
-            return comment.subList(0, toIndex = count)
-        } else {
-            throw NotesNotFoundException("Заметок под номером $noteId, не существует")
+        count: Int = 0 // 0 означает "все комментарии"
+    ): List<Comment<Int, String>> {
+        val commentsForNote = comment.filter { it.noteId == noteId }
+
+        if (commentsForNote.isEmpty()) {
+            throw NotesNotFoundException("Комментариев для заметки $noteId не найдено")
         }
+
+        return if (count > 0) commentsForNote.take(count) else commentsForNote
     }
 
     //восстановление комментария
     fun restoreComment(commentId: Int) {
-        val foundDeletedComment = deleteComment.find { it.noteId == commentId }
+        val foundDeletedComment = deleteComment.find { it.commentId == commentId }
         if (foundDeletedComment != null) {
             comment.add(foundDeletedComment)
         }

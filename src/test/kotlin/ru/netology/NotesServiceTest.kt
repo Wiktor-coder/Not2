@@ -62,7 +62,7 @@ class NotesServiceTest {
             title = "Тестовая заметка", text = "Текст заметки", privacy = 0, commentPrivacy = 0,
             nId = 0
         )
-        val commentId = notesService.createComment(noteId, "Первый комментарий", commentId = 1)
+        val commentId = notesService.createComment(noteId, "Первый комментарий")
         assertTrue(notesService.comment.any { it.noteId == noteId })
     }
 
@@ -77,7 +77,7 @@ class NotesServiceTest {
     fun testDeleteComment() {
         val noteId = NotesService()
         noteId.add(0, "Тестовая заметка", "Текст заметки", 0, 0)
-        val commentId = noteId.createComment(noteId = 1, "Первый комментарий", commentId = 1)
+        val commentId = noteId.createComment(noteId = 1, "Первый комментарий")
         noteId.deleteComment(commentId)
         assertFalse(noteId.comment.any { it.noteId.equals(noteId) })
     }
@@ -87,7 +87,7 @@ class NotesServiceTest {
     fun testRestoreComment() {
         val notesService = NotesService()
         val noteId = notesService.add(0,"Тестовая заметка", "Текст заметки", 0, 0)
-        val commentId = notesService.createComment(noteId, "Первый комментарий", commentId = 1)
+        val commentId = notesService.createComment(noteId, "Первый комментарий")
         notesService.deleteComment(commentId)
         notesService.restoreComment(commentId)
         assertTrue(notesService.comment.any { it.noteId == noteId })
