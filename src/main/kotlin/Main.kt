@@ -24,6 +24,7 @@ val COMMENT_PRIVACY = listOf<Int>(
 data class Comment<A, B>(
     var noteId: A,
     var message: B,
+    var commetId: A,
 )
 
 class NotesService {
@@ -54,12 +55,12 @@ class NotesService {
     }
 
     //создание комментария
-    fun createComment(noteId: Int, message: String): Int {
+    fun createComment(noteId: Int, message: String, commentId: Int): Int {
         val notesExists = notes.any { it.nId == noteId }
         if (!notesExists) {
             throw NotesNotFoundException("Заметки под номером $noteId, не существует")
         }
-        comment.add(Comment(noteId = noteId, message = message))
+        comment.add(Comment(noteId = noteId, message = message, commetId = commentId))
         return cId++
     }
 
@@ -122,18 +123,15 @@ class NotesService {
     }
 
     //получение заметок
-    fun <A, B> get(
-        noteIds: A,
-        userId: B,
+    fun get(
+        noteId: Int,
         count: Int,
-    ): Any {
-        val objectsNote = notes.find { it.nId == noteIds }
-        if (objectsNote != null) {
-            return objectsNote
-        } else if (count > 0) {
-            return notes.subList(0, toIndex = count)
+    ): List<Notes<Int, String>> {
+        val objectNote = notes.find { it.nId == noteId } ?: throw NotesNotFoundException("Заметок под номером $noteId, не существует")
+        return if (count > 0) {
+            notes.subList(0, toIndex = count)
         } else {
-            throw NotesNotFoundException("Заметок под номером $noteIds, не существует")
+            listOf(objectNote)
         }
     }
 
